@@ -18,15 +18,17 @@ With a good dose of curiosity and the free resource, GRFICSv3, I decided to lear
 
 ---
 
-### Core Containers & Access Points| Container | How to Access | Credentials | Description |
+### Core Containers & Access Topology
+
+| Container | How to Access | Credentials | Description |
 | --- | --- | --- | --- |
 | **Simulation** | [http://localhost](http://localhost) | — | 3D chemical plant visualization |
 | **Engineering Workstation** | [http://localhost:6080](http://localhost:6080) | — | HMI and PLC configuration |
 | **Kali** | [http://localhost:6088](http://localhost:6088) | `kali : kali` | Attacker VM for exploitation and scanning |
 | **Caldera** | [http://localhost:8888](http://localhost:8888) | `red : fortiphyd-red` | MITRE Caldera with OT plugin |
-| **PLC (OpenPLC)** | [http://localhost:8080](http://localhost:8080) or `192.168.95.2:8080` | `openplc : openplc` | Programmable logic controller |
-| **HMI** | [http://localhost:6081](http://localhost:6081) or `192.168.90.107:8080` | `admin : admin` | Operator interface |
-| **Router / Firewall UI** | `192.168.90.200:5000` or `192.168.95.200:5000` | `admin : password` | View or modify firewall rules |
+| **PLC (OpenPLC)** | [http://localhost:8080](http://localhost:8080) or [http://192.168.95.2:8080](http://192.168.95.2:8080) | `openplc : openplc` | Programmable logic controller |
+| **HMI** | [http://localhost:6081](http://localhost:6081) or [http://192.168.90.107:8080](http://192.168.90.107:8080) | `admin : admin` | Operator interface |
+| **Router / Firewall UI** | [http://192.168.90.200:5000](http://192.168.90.200:5000) or [http://192.168.95.200:5000](http://192.168.95.200:5000) | `admin : password` | View or modify firewall rules |
 | **Wazuh SIEM** *(optional)* | [http://localhost:5601](http://localhost:5601) | `admin : admin` | SIEM dashboard — security events, alerts |
 
 ---
