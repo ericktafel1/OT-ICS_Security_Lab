@@ -33,20 +33,27 @@ With a good dose of curiosity and the free resource, GRFICSv3, I decided to lear
 
 ---
 
-### Key Attack Vector Breakdowns
+### Modbus Write Function Codes Reference
 
-Exploring this lab environment highlights exactly how legacy industrial design flaws translate into catastrophic real-world failures. The attack lifecycle generally follows three distinct stages:
+| Function Code (Hex) | Function Code (Decimal) | Name | Data Type | Operation Description |
+| :---: | :---: | :--- | :--- | :--- |
+| **`0x05`** | `05` | Write Single Coil | 1-bit (Boolean) | Force a single discrete output bit (ON or OFF) |
+| **`0x06`** | `06` | Write Single Register | 16-bit Word | Change the value of one internal holding register |
+| **`0x0F`** | `15` | Write Multiple Coils | 1-bit blocks | Forces a sequential block of contiguous bits ON or OFF |
+| **`0x10`** | `16` | Write Multiple Registers | 16-bit blocks | Writes a sequential block of contiguous holding registers |
+| **`0x16`** | `22` | Mask Write Register | Bit-level mask | Modifies specific bits inside a single register using an AND/OR mask |
+| **`0x17`** | `23` | Read/Write Multiple Registers | 16-bit blocks | Executes a read loop and a write loop in a single instruction |
 
-1. **OT Reconnaissance & Register Mapping**
-Because Modbus TCP lacks inherent authentication, an attacker can gain a foothold in the OT subnet and use tools like `mbtget` or `pymodbus` to sweep the entire address table. Then an adversary would decode the **UINT16 scaling** of the process data. By taking passive Wireshark captures of HMI traffic or pulling configuration scripts directly from an exposed Engineering Workstation (EWS), an attacker can map human-readable labels (like `pressure_setpoint` or `run_bit`) directly to specific Modbus holding registers (e.g., `HR 1026`).
+---
 
-2. **Process Manipulation (The "Insecure by Design" Flaw)**
-Once the register map is known, an attacker can mirror historically devastating ICS incidents using pure protocol functionality rather than malware:
-* **The Setpoint Slam (Oldsmar Style):** Forcing a high-value write to a memory word (such as jumping a chemical composition setting past normal tolerance) and allowing the PLC's native logic to drive the plant to an unstable state.
-* **The Run-Bit Kill (FrostyGoop Style):** Commanding a brute-force shutdown by toggling the PLC runtime control bit, instantly disabling core safety automation and cutting off critical utility output.
+### Core Attack Vectors & Technical References
 
-3. **Visual & Operational Destruction**
-By maintaining malicious register states or manipulating sensor feedback loops (preventing the HMI from seeing real pressure rises), the physical system safety margins quickly erode. In the 3D process simulation, a sustained high-pressure hold eventually causes a visual reactor vessel rupture, proving that unauthenticated network access to lower-level controllers results in absolute command over physical consequences.
+| Vector Type | Protocol Vulnerability | Tooling & Tactics | Reference Resources |
+| :--- | :--- | :--- | :--- |
+| **Command Injection** | Zero native authentication or client identity verification. | Sending unauthorized `FC06`/`FC10` requests over port 502 to alter device setpoints. | [Software Toolbox: Modbus Function Codes Guide](https://softwaretoolbox.com/blog/opc-modbus-function-codes) |
+| **Man-in-the-Middle** | Lack of encryption allowing cleartext packet parsing and payload altering. | ARP spoofing to intercept traffic, modify register payloads inside `FC16` on-the-fly, and rewrite CRCs. | [SANS Institute: MitM Against Modbus TCP Illustrated with Wireshark](https://www.sans.org/white-papers/38095) |
+| **Packet Layout Analysis** | Static header constraints making signature forgery simple. | Constructing raw Application Protocol (MBAP) headers for manual script execution. | [SANS Poster: Modbus RTU / TCP Packet Reference Structures](https://www.sans.org/posters/modbus-rtu-tcp) |
+| **Replay & DoS Attacks** | No cryptographic sequence tokens or timestamp verification. | Sniffing working baselines, spamming malformed functions, or running diagnostic loops (`FC08`) to fault a PLC. | [Veridify Analysis: Modbus Security Failures and Mitigation Risks](https://www.veridify.com/article/modbus-security-issues-and-how-to-mitigate-cyber-risks/) |
 
 ---
 
